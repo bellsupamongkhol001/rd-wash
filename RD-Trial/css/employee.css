@@ -1,0 +1,292 @@
+/* ==================== GLOBAL ==================== */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #f4f7fa;
+  margin: 0;
+  padding: 20px;
+  color: #2e3a59;
+}
+
+h2, h3 {
+  margin-bottom: 0.5rem;
+  color: #2e3a59;
+  font-size: 1.4rem;
+}
+
+/* ==================== HEADER ==================== */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.header h2 i {
+  margin-right: 8px;
+  color: #3a6ea5;
+}
+
+/* ==================== NAVIGATION ==================== */
+nav {
+  display: flex;
+  justify-content: center;
+  background-color: #3a6ea5;
+  padding: 12px 0;
+  width: 100%;
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-links li {
+  margin: 0 15px;
+}
+
+.flag-button {
+  display: inline-flex;
+  align-items: center;
+  background-color: #f4a261;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+}
+
+.flag-button i {
+  margin-right: 8px;
+}
+
+.flag-button:hover {
+  background-color: #e76f51;
+}
+
+/* ==================== HEADER CONTROLS ==================== */
+.header-controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+input, button, select {
+  padding: 12px;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  outline: none;
+  background: #fff;
+  color: #333;
+  transition: border-color 0.3s ease;
+}
+
+input:focus, select:focus, button:focus {
+  border-color: #3a6ea5;
+}
+
+#searchEmployee {
+  width: 260px;
+}
+
+.btn {
+  background: #3a6ea5;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: #345e8b;
+  transform: translateY(-1px);
+}
+
+/* ==================== MAIN TABLE ==================== */
+.main-table {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.main-table h3 {
+  margin-bottom: 15px;
+  font-size: 1.3rem;
+}
+
+.main-table table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.main-table th, .main-table td {
+  padding: 14px;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+  font-size: 1rem;
+}
+
+.main-table th {
+  background: #3a6ea5;
+  color: white;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+}
+
+.main-table td {
+  background: #fafafa;
+}
+
+.main-table td img {
+  max-width: 60px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+/* ==================== MODAL ==================== */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.4);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 500px;
+  width: 90%;
+  position: relative;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  animation: slideUp 0.3s ease;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  text-align: center;
+  color: #3a6ea5;
+}
+
+.modal-content label {
+  display: block;
+  margin-top: 12px;
+  font-weight: 500;
+  color: #333;
+}
+
+.modal-content input[type="text"],
+.modal-content input[type="number"],
+.modal-content input[type="file"] {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  font-size: 1.1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #fafafa;
+  box-sizing: border-box;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn-save {
+  background-color: #4caf50;
+  color: white;
+}
+
+.btn-cancel {
+  background-color: #f44336;
+  color: white;
+}
+
+.btn-save:hover {
+  background-color: #43a047;
+}
+
+.btn-cancel:hover {
+  background-color: #e53935;
+}
+
+/* ==================== DELETE MODAL ==================== */
+#deleteModal .modal-actions {
+  justify-content: center;
+}
+
+.btn-yes {
+  background: #dc3545;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 6px;
+}
+
+.btn-no {
+  background: #6c757d;
+  color: #333;
+  padding: 10px 18px;
+  border-radius: 6px;
+}
+
+/* ==================== ACTION BUTTONS ==================== */
+.actions button {
+  margin: 0 4px;
+  padding: 8px 14px;
+  font-size: 0.95rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-block;
+}
+
+.actions .edit {
+  background: #ffc107;
+  color: white;
+  border: none;
+}
+
+.actions .delete {
+  background: #dc3545;
+  color: white;
+  border: none;
+}
+
+.actions button:hover {
+  transform: scale(1.05);
+}
+
+.actions .edit:hover {
+  background: #e0a800;
+}
+
+.actions .delete:hover {
+  background: #c82333;
+}
+
+/* ==================== ANIMATIONS ==================== */
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);   opacity: 1; }
+}

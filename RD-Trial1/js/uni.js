@@ -4,6 +4,7 @@ const DB_VERSION = 1;
 const STORE_NAME = 'uniforms';
 
 let db;
+let currentPhoto = null;
 
 // Initialize DB and render table on DOM load
 document.addEventListener('DOMContentLoaded', () => {
@@ -53,12 +54,30 @@ function toggleDeleteModal(show, id = null) {
   currentDeleteId = id;
 }
 
+// ==================== Generate New Uniform ID ====================
+function generateNewUniformId() {
+  return getAllUniforms().then((uniforms) => {
+    const prefix = 'RD-Uniform-';
+    let max = 0;
+    uniforms.forEach(u => {
+      const match = u.uniformId?.match(/RD-Uniform-(\d{4})/);
+      if (match) {
+        const num = parseInt(match[1]);
+        if (num > max) max = num;
+      }
+    });
+    const next = (max + 1).toString().padStart(4, '0');
+    return prefix + next;
+  });
+}
+
 // ==================== CRUD Operations ====================
 function openUniformForm(id = null) {
   clearForm();
   toggleUniformModal(true);
 
   const modalTitle = document.getElementById('uniformModalTitle');
+
   if (id) {
     modalTitle.textContent = 'Edit Uniform';
     getUniform(id).then((uni) => {
@@ -67,46 +86,48 @@ function openUniformForm(id = null) {
         document.getElementById('uniformName').value = uni.uniformName;
         document.getElementById('size').value = uni.size;
         document.getElementById('color').value = uni.color;
-        document.getElementById('quantity').value = uni.quantity;
+
+        currentPhoto = uni.photo;
       }
     });
   } else {
     modalTitle.textContent = 'Add Uniform';
-    document.getElementById('uniformId').value = 'UNI-' + Date.now();
+    generateNewUniformId().then(newId => {
+      document.getElementById('uniformId').value = newId;
+    });
+    currentPhoto = null;
   }
 }
 
 function clearForm() {
-  ['uniformId', 'uniformName', 'size', 'color', 'quantity', 'uniformPhoto'].forEach(id => {
+  ['uniformId', 'uniformName', 'size', 'color', 'uniformPhoto'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
+  currentPhoto = null;
 }
 
 function saveUniform(event) {
   event.preventDefault();
 
-  const id = document.getElementById('uniformId').value.trim();
-  const name = document.getElementById('uniformName').value.trim();
-  const size = document.getElementById('size').value.trim();
-  const color = document.getElementById('color').value.trim();
-  const qty = parseInt(document.getElementById('quantity').value);
-  const file = document.getElementById('uniformPhoto').files[0];
+  const id = document.getElementById('uniformId')?.value.trim();
+  const name = document.getElementById('uniformName')?.value.trim();
+  const size = document.getElementById('size')?.value.trim();
+  const color = document.getElementById('color')?.value.trim();
+  const file = document.getElementById('uniformPhoto')?.files[0];
 
-  if (!id || !name || !size || !color || !qty || !file) {
-    alert('Please fill in all fields and select a photo.');
+  if (!id || !name || !size || !color) {
+    alert('Please fill in all fields.');
     return;
   }
 
-  const reader = new FileReader();
-  reader.onload = function (e) {
+  const saveToDB = (photoDataUrl) => {
     const uniform = {
       uniformId: id,
       uniformName: name,
       size,
       color,
-      quantity: qty,
-      photo: e.target.result
+      photo: photoDataUrl
     };
 
     const transaction = db.transaction([STORE_NAME], 'readwrite');
@@ -118,7 +139,18 @@ function saveUniform(event) {
       renderUniformTable();
     };
   };
-  reader.readAsDataURL(file);
+
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (e) => saveToDB(e.target.result);
+    reader.readAsDataURL(file);
+  } else {
+    if (!currentPhoto) {
+      alert('Please upload a photo.');
+      return;
+    }
+    saveToDB(currentPhoto);
+  }
 }
 
 function deleteUniform() {
@@ -159,19 +191,23 @@ function renderUniformTable() {
 
   getAllUniforms().then((uniforms) => {
     if (uniforms.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6">No uniforms found.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5">No uniforms found.</td></tr>';
       return;
     }
 
     uniforms.forEach((uni) => {
-      if (!uni.uniformName.toLowerCase().includes(keyword)) return;
+      const matchKeyword =
+        uni.uniformName.toLowerCase().includes(keyword) ||
+        uni.size.toLowerCase().includes(keyword) ||
+        uni.color.toLowerCase().includes(keyword);
+
+      if (!matchKeyword) return;
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>${uni.uniformName}</td>
         <td>${uni.size}</td>
         <td>${uni.color}</td>
-        <td>${uni.quantity}</td>
         <td><img src="${uni.photo}" alt="Uniform Photo" style="max-width:60px; border-radius:6px;"></td>
         <td class="actions">
           <button class="edit" onclick="openUniformForm('${uni.uniformId}')">Edit</button>
@@ -189,20 +225,20 @@ function generateUniformMock() {
   const colors = ['White', 'Blue', 'Black', 'Gray', 'Navy'];
   const photo = 'https://cdn-icons-png.flaticon.com/512/5242/5242103.png';
 
-  for (let i = 0; i < 20; i++) {
-    const uniform = {
-      uniformId: 'UNI-' + (1000 + i),
-      uniformName: 'Uniform ' + (i + 1),
-      size: sizes[Math.floor(Math.random() * sizes.length)],
-      color: colors[Math.floor(Math.random() * colors.length)],
-      quantity: Math.floor(Math.random() * 50) + 1,
-      photo
-    };
-
-    const transaction = db.transaction([STORE_NAME], 'readwrite');
-    const store = transaction.objectStore(STORE_NAME);
-    store.put(uniform);
-  }
-
-  setTimeout(renderUniformTable, 300);
+  getAllUniforms().then(existing => {
+    let count = existing.length;
+    for (let i = 0; i < 20; i++) {
+      const uniform = {
+        uniformId: 'RD-Uniform-' + (count + i + 1).toString().padStart(4, '0'),
+        uniformName: 'Uniform ' + (count + i + 1),
+        size: sizes[Math.floor(Math.random() * sizes.length)],
+        color: colors[Math.floor(Math.random() * colors.length)],
+        photo
+      };
+      const transaction = db.transaction([STORE_NAME], 'readwrite');
+      const store = transaction.objectStore(STORE_NAME);
+      store.put(uniform);
+    }
+    setTimeout(renderUniformTable, 300);
+  });
 }

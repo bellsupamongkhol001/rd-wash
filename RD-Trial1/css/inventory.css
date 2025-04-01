@@ -186,6 +186,24 @@ nav {
   background: #c82333;
 }
 
+.actions .detail {
+  background-color: #17a2b8;
+  color: white;
+}
+
+.actions .detail:hover {
+  background-color: #138496;
+}
+
+.status-tag {
+  display: inline-block;
+  padding: 4px 8px;
+  background: #3a6ea5;
+  color: white;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
 /* ==================== MODAL ==================== */
 .modal {
   position: fixed;

@@ -331,31 +331,136 @@ tbody tr {
   color: #999;
 }
 
-/* ==================== RESPONSIVE ==================== */
+/* ==================== RESPONSIVE DESIGN ==================== */
+
+/* สำหรับหน้าจอที่กว้างไม่เกิน 1366px (แล็ปท็อปทั่วไป) */
+@media (max-width: 1366px) {
+  .header h2 {
+    font-size: 1.4rem;
+  }
+
+  .header-controls {
+    gap: 6px;
+  }
+
+  .employee-search input {
+    width: 220px;
+  }
+
+  .main-table table th, .main-table table td {
+    font-size: 0.85rem;
+  }
+
+  .actions button {
+    font-size: 0.8rem;
+    padding: 5px 10px;
+  }
+
+  .modal-content {
+    padding: 20px;
+  }
+}
+
+/* สำหรับหน้าจอที่กว้างไม่เกิน 1200px (แท็บเล็ต/แล็ปท็อปขนาดเล็ก) */
+@media (max-width: 1200px) {
+  .header h2 {
+    font-size: 1.4rem;
+  }
+
+  .header-controls {
+    gap: 8px;
+  }
+
+  .employee-search input {
+    width: 240px;
+  }
+
+  .main-table table th, .main-table table td {
+    font-size: 0.9rem;
+  }
+
+  .actions button {
+    font-size: 0.85rem;
+    padding: 6px 12px;
+  }
+
+  .actions .edit, .actions .delete {
+    transform: scale(1.02);
+  }
+
+  .modal-content {
+    padding: 24px;
+  }
+}
+
+/* สำหรับหน้าจอที่กว้างไม่เกิน 1024px (แท็บเล็ต) */
+@media (max-width: 1024px) {
+  .header h2 {
+    font-size: 1.3rem;
+  }
+
+  .employee-search input {
+    width: 200px;
+  }
+
+  .main-table table {
+    font-size: 0.9rem;
+  }
+
+  .main-table th, .main-table td {
+    padding: 10px;
+  }
+
+  .actions button {
+    font-size: 0.75rem;
+    padding: 5px 10px;
+  }
+
+  .modal-content {
+    padding: 20px;
+    width: 95%;
+  }
+}
+
+/* สำหรับหน้าจอที่กว้างไม่เกิน 768px (สมาร์ทโฟน) */
 @media (max-width: 768px) {
+  .header h2 {
+    font-size: 1.2rem;
+  }
+
+  .header-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .employee-search input {
+    width: 100%;
+  }
+
+  .employee-search h3 {
+    font-size: 1.2rem;
+  }
+
+  .main-table {
+    padding: 10px;
+  }
+
   .main-table table,
   .main-table thead,
   .main-table tbody,
   .main-table th,
   .main-table td,
-  .main-table tr,
-  .history-table,
-  .history-table thead,
-  .history-table tbody,
-  .history-table th,
-  .history-table td,
-  .history-table tr {
+  .main-table tr {
     display: block;
     width: 100%;
   }
 
-  .main-table thead,
-  .history-table thead {
+  .main-table thead {
     display: none;
   }
 
-  .main-table tr,
-  .history-table tr {
+  .main-table tr {
     margin-bottom: 16px;
     background: white;
     border-radius: 8px;
@@ -363,13 +468,74 @@ tbody tr {
     padding: 12px;
   }
 
-  .main-table td::before,
-  .history-table td::before {
+  .main-table td {
+    text-align: left;
+    position: relative;
+    padding-left: 50%;
+  }
+
+  .main-table td::before {
     content: attr(data-label);
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    width: 45%;
+    padding-right: 10px;
+    white-space: nowrap;
     font-weight: bold;
-    display: block;
-    margin-bottom: 6px;
     color: #3a6ea5;
+  }
+
+  .actions button {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+  }
+
+  .modal-content {
+    padding: 15px;
+    width: 90%;
+    max-width: 95%;
+  }
+
+  .modal-content input[type="text"],
+  .modal-content input[type="number"],
+  .modal-content input[type="file"] {
+    font-size: 1rem;
+    padding: 10px;
+  }
+
+  .modal-content label {
+    font-size: 0.95rem;
+  }
+
+  .modal-actions {
+    display: block;
+    margin-top: 20px;
+    text-align: center;
+  }
+
+  .btn-save, .btn-cancel, .btn-yes, .btn-no {
+    width: 100%;
+    padding: 12px 0;
+    font-size: 1rem;
+  }
+
+  .confirm-box {
+    width: 90%;
+    padding: 20px;
+  }
+
+  .confirm-box h3 {
+    font-size: 1.2rem;
+  }
+
+  .confirm-box p {
+    font-size: 1rem;
+  }
+
+  .confirm-box button {
+    width: 100%;
+    margin-bottom: 10px;
   }
 }
 

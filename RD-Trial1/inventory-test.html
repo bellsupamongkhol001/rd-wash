@@ -11,7 +11,7 @@
 
   <!-- 🔷 HEADER -->
   <header class="header">
-    <h2><i class="fas fa-box"></i>Inventory Management</h2>
+    <h2><i class="fas fa-box"></i> Inventory Management</h2>
   </header>
 
   <!-- 🔷 CONTROL PANEL -->
@@ -27,7 +27,30 @@
     <section class="card-grid" id="inventoryList">
       <!-- Cards will be injected by JavaScript -->
     </section>
+
+    <!-- 🔷 DETAIL TABLE -->
+    <section class="uniform-details" id="uniformDetails" style="display: none; margin-top: 40px;">
+      <h3><i class="fas fa-info-circle"></i> Uniform Ownership Details</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Uniform Code</th>
+            <th>Size</th>
+            <th>Color</th>
+            <th>Qty</th>
+            <th>Employee ID</th>
+            <th>Name</th>
+            <th>Department</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="uniformDetailTableBody">
+          <!-- Rows will be populated via JavaScript -->
+        </tbody>
+      </table>
+    </section>
   </main>
+
 
   <!-- 🔷 MODAL FORM -->
   <div class="modal" id="inventoryModal">
@@ -46,10 +69,17 @@
         <input type="text" id="UniformColor" required placeholder="e.g. Blue, White" />
 
         <label for="UniformQty">Quantity</label>
-        <input type="number" id="UniformQty" required min="1" placeholder="Stock quantity" />
+        <input type="number" id="UniformQty" required min="0" placeholder="Stock quantity" />
 
         <label for="UniformPicture">Picture</label>
         <input type="file" id="UniformPicture" accept="image/*" />
+
+        <!-- 🔶 NEW: EMPLOYEE OWNER SELECTION -->
+        <label for="UniformOwner">Assign to Employee (optional)</label>
+        <select id="UniformOwner">
+          <option value="">— None —</option>
+          <!-- Employee options will be injected here -->
+        </select>
 
         <div class="modal-actions">
           <button type="submit" class="btn-save">💾 Save</button>
@@ -59,11 +89,34 @@
     </div>
   </div>
 
+  <!-- 🔷 DETAIL MODAL -->
+  <div class="modal" id="detailModal">
+    <div class="modal-content">
+      <h3>Uniform Detail</h3>
+      <div id="detailContent"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" onclick="toggleDetailModal(false)">❌ Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🔷 DELETE MODAL -->
+  <div class="modal" id="deleteModal">
+    <div class="modal-content">
+      <h3>Are you sure you want to delete this uniform?</h3>
+      <div class="modal-actions">
+        <button class="btn-save" onclick="deleteUniform()">✅ Yes, Delete</button>
+        <button class="btn-cancel" onclick="toggleDeleteModal(false)">❌ Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 🔷 FOOTER -->
   <footer class="footer">
     <p>&copy; 2025 RD Wash System.</p>
   </footer>
 
+  <!-- 🔷 SCRIPT -->
   <script src="./js/inventory.js"></script>
 </body>
 </html>

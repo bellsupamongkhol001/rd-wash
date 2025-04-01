@@ -86,6 +86,8 @@ function openUniformForm(id = null) {
         document.getElementById('uniformName').value = uni.uniformName;
         document.getElementById('size').value = uni.size;
         document.getElementById('color').value = uni.color;
+        document.getElementById('type').value = uni.type || '';
+        document.getElementById('quantity').value = uni.quantity || 1;
 
         currentPhoto = uni.photo;
       }
@@ -100,7 +102,7 @@ function openUniformForm(id = null) {
 }
 
 function clearForm() {
-  ['uniformId', 'uniformName', 'size', 'color', 'uniformPhoto'].forEach(id => {
+  ['uniformId', 'uniformName', 'size', 'color', 'uniformPhoto', 'type', 'quantity'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -114,10 +116,17 @@ function saveUniform(event) {
   const name = document.getElementById('uniformName')?.value.trim();
   const size = document.getElementById('size')?.value.trim();
   const color = document.getElementById('color')?.value.trim();
+  const type = document.getElementById('type')?.value.trim();
+  const quantity = parseInt(document.getElementById('quantity')?.value.trim() || '0');
   const file = document.getElementById('uniformPhoto')?.files[0];
 
-  if (!id || !name || !size || !color) {
-    alert('Please fill in all fields.');
+  if (!id || !name || !size || !color || !type || isNaN(quantity) || quantity <= 0) {
+    alert('⚠️ Please fill in all fields correctly.');
+    return;
+  }
+
+  if (file && !file.type.startsWith('image/')) {
+    alert('⚠️ Please upload a valid image file.');
     return;
   }
 
@@ -127,6 +136,8 @@ function saveUniform(event) {
       uniformName: name,
       size,
       color,
+      type,
+      quantity,
       photo: photoDataUrl
     };
 
@@ -146,7 +157,7 @@ function saveUniform(event) {
     reader.readAsDataURL(file);
   } else {
     if (!currentPhoto) {
-      alert('Please upload a photo.');
+      alert('⚠️ Please upload a photo.');
       return;
     }
     saveToDB(currentPhoto);
@@ -191,7 +202,7 @@ function renderUniformTable() {
 
   getAllUniforms().then((uniforms) => {
     if (uniforms.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5">No uniforms found.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6">No uniforms found.</td></tr>';
       return;
     }
 
@@ -209,6 +220,7 @@ function renderUniformTable() {
         <td>${uni.size}</td>
         <td>${uni.color}</td>
         <td><img src="${uni.photo}" alt="Uniform Photo" style="max-width:60px; border-radius:6px;"></td>
+        <td>${uni.quantity || 1}</td>
         <td class="actions">
           <button class="edit" onclick="openUniformForm('${uni.uniformId}')">Edit</button>
           <button class="delete" onclick="toggleDeleteModal(true, '${uni.uniformId}')">Delete</button>
@@ -224,6 +236,7 @@ function generateUniformMock() {
   const sizes = ['S', 'M', 'L', 'XL'];
   const colors = ['White', 'Blue', 'Black', 'Gray', 'Navy'];
   const photo = 'https://cdn-icons-png.flaticon.com/512/5242/5242103.png';
+  const types = ['Shirt', 'Pant', 'Coat'];
 
   getAllUniforms().then(existing => {
     let count = existing.length;
@@ -233,6 +246,8 @@ function generateUniformMock() {
         uniformName: 'Uniform ' + (count + i + 1),
         size: sizes[Math.floor(Math.random() * sizes.length)],
         color: colors[Math.floor(Math.random() * colors.length)],
+        type: types[Math.floor(Math.random() * types.length)],
+        quantity: Math.floor(Math.random() * 10) + 1,
         photo
       };
       const transaction = db.transaction([STORE_NAME], 'readwrite');

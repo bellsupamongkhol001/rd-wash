@@ -40,7 +40,7 @@
       <option value="Waiting Rewash #3">Waiting Rewash #3</option>
       <option value="Completed">Completed</option>
     </select>
-    <button class="btn" onclick="openForm()">➕ Add</button>
+    <button class="btn" onclick="openForm()">➕ Add Wash</button>
     <button class="btn" id="generateMockDataBtn">📦 Generate Mock Data</button>
   </div>
 
@@ -89,18 +89,27 @@
     <div class="modal-content">
       <span class="close" onclick="toggleModal(false)">&times;</span>
       <h3 id="modalTitle">Add Wash Job</h3>
-      <label for="empId">Employee ID</label>
-      <input type="text" id="empId" />
-      <label for="empName">Employee Name</label>
-      <input type="text" id="empName" />
-      <label for="department">Department</label>
-      <input type="text" id="department" />
+
       <label for="uniformCode">Uniform Code</label>
-      <input type="text" id="uniformCode" />
+      <input type="text" id="uniformCode" placeholder="กรอก Uniform Code" />
+      
       <label for="color">Color</label>
-      <input type="text" id="color" />
+      <input type="text" id="color" readonly title="จะดึงข้อมูลจาก Uniform DB โดยอัตโนมัติ" />
+      
       <label for="qty">Quantity</label>
-      <input type="number" id="qty" min="1" value="1" />
+      <input type="number" id="qty" min="1" max="1" value="1"/>
+      
+      <label for="empId">Employee ID</label>
+      <input type="text" id="empId" readonly />
+      
+      <label for="empName">Employee Name</label>
+      <input type="text" id="empName" readonly title="ระบบจะค้นหาชื่อพนักงานโดยอัตโนมัติจาก Uniform Code" />
+      
+      <label for="department">Department</label>
+      <input type="text" id="department" readonly />
+      
+      
+
       <input type="hidden" id="editIndex" />
       <div class="modal-actions">
         <button class="btn-save" onclick="saveWash()">Save</button>

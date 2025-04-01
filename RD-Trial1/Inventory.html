@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Uniform Inventory & Assignment</title>
+  <link rel="stylesheet" href="./css/inv.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+  <header class="header">
+    <h2><i class="fas fa-warehouse"></i> Uniform Inventory & Assignment</h2>
+  </header>
+
+  <section class="header-controls">
+    <button class="btn" onclick="openUniformForm()">➕ Add Uniform</button>
+    <button class="btn" onclick="openAssignForm()">🎯 Assign Uniform</button>
+    <button class="btn" onclick="openAdjustStockForm()">🛠️ Adjust Stock</button>
+    <button class="btn" onclick="generateReport()">📊 Generate Report</button>
+  </section>
+
+  <main>
+    <!-- 🔹 Uniform Stock Section -->
+    <section class="main-section">
+      <div class="section-header">
+        <h3><i class="fas fa-boxes"></i> Stock Overview</h3>
+        <input type="text" id="searchUniform" placeholder="🔎 Search by Name / Size / Type">
+      </div>
+      <div id="uniformList" class="card-grid"></div>
+    </section>
+
+    <!-- 🔹 Assignment Section -->
+    <section class="main-section">
+      <div class="section-header">
+        <h3><i class="fas fa-user-check"></i> Assign Uniform to Employee</h3>
+      </div>
+      <form id="assignForm">
+        <label for="assignUniformId">Uniform</label>
+        <select id="assignUniformId"></select>
+
+        <label for="assignEmployeeId">Employee</label>
+        <select id="assignEmployeeId"></select>
+
+        <label for="assignQty">Quantity</label>
+        <input type="number" id="assignQty" min="1" value="1">
+
+        <button type="submit" class="btn-save">✅ Assign</button>
+      </form>
+
+      <h4>📋 Assignment History</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>Uniform ID</th>
+            <th>Employee ID</th>
+            <th>Qty</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="assignmentTableBody"></tbody>
+      </table>
+    </section>
+
+    <!-- 🔹 Adjust Stock Modal -->
+    <div class="modal" id="adjustStockModal">
+      <div class="modal-content">
+        <h3>Adjust Stock</h3>
+        <label for="adjustUniformId">Uniform</label>
+        <select id="adjustUniformId"></select>
+
+        <label for="adjustQty">New Quantity</label>
+        <input type="number" id="adjustQty" min="0">
+
+        <div class="modal-actions">
+          <button class="btn-save" onclick="submitStockAdjustment()">💾 Save</button>
+          <button class="btn-cancel" onclick="toggleAdjustStockModal(false)">❌ Cancel</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>&copy; 2025 RD Wash System.</p>
+  </footer>
+
+  <script src="./js/inv.js"></script>
+</body>
+</html>

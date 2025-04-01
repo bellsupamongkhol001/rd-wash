@@ -653,3 +653,12 @@ tbody tr {
 .btn-export:hover {
   background-color: #0056b3;
 }
+
+.text-error {
+  color: red;
+  font-weight: bold;
+}
+.text-warning {
+  color: orange;
+  font-weight: bold;
+}

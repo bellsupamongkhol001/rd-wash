@@ -1,14 +1,16 @@
 // ==================== IndexedDB Setup ====================
-const DB_NAME = 'RDWashDB_employee';
+const DB_NAME = "RDWashDB_employee";
 const DB_VERSION = 1; // เพิ่มเวอร์ชันเพื่อหลีกเลี่ยง VersionError
-const STORE_NAME = 'employees';
+const STORE_NAME = "employees";
 
 let db;
 
 // Initialize DB and render table on DOM load
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
   initDB().then(() => {
-    document.getElementById('searchEmployee').addEventListener('input', renderEmployeeTable);
+    document
+      .getElementById("searchEmployee")
+      .addEventListener("input", renderEmployeeTable);
     renderEmployeeTable();
   });
 });
@@ -19,7 +21,7 @@ function initDB() {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
 
     request.onerror = (e) => {
-      console.error('❌ IndexedDB error:', e.target.error);
+      console.error("❌ IndexedDB error:", e.target.error);
       reject(e);
     };
 
@@ -37,51 +39,91 @@ function initDB() {
       console.log(`⚙️ Upgrading DB from v${oldVersion} → v${newVersion}`);
 
       if (!db.objectStoreNames.contains(STORE_NAME)) {
-        const store = db.createObjectStore(STORE_NAME, { keyPath: 'employeeId' });
-        store.createIndex('employeeName', 'employeeName', { unique: false });
-        store.createIndex('department', 'department', { unique: false });
+        const store = db.createObjectStore(STORE_NAME, {
+          keyPath: "employeeId",
+        });
+        store.createIndex("employeeName", "employeeName", { unique: false });
+        store.createIndex("department", "department", { unique: false });
       } else {
         const transaction = e.target.transaction;
         const store = transaction.objectStore(STORE_NAME);
 
-        if (!store.indexNames.contains('employeeName')) {
-          store.createIndex('employeeName', 'employeeName', { unique: false });
+        if (!store.indexNames.contains("employeeName")) {
+          store.createIndex("employeeName", "employeeName", { unique: false });
         }
 
-        if (!store.indexNames.contains('department')) {
-          store.createIndex('department', 'department', { unique: false });
+        if (!store.indexNames.contains("department")) {
+          store.createIndex("department", "department", { unique: false });
         }
       }
     };
   });
 }
 
-// ==================== CRUD Operations ====================
-function openEmployeeForm(id = null) {
-  const modal = document.getElementById('employeeFormModal');
-  const title = document.getElementById('employeeModalTitle');
-  clearForm();  // เคลียร์ฟอร์มก่อนเปิด
+// ==================== Validation Logic ====================
+async function validateEmployeeForm() {
+  const id = document.getElementById("employeeId").value.trim();
+  const name = document.getElementById("employeeName").value.trim();
+  const dept = document.getElementById("employeeDept").value.trim();
+  const editId = document.getElementById("employeeEditIndex").value;
 
-  if (id) {
-    title.textContent = 'Edit Employee';
-    getEmployee(id).then(emp => {
-      if (emp) {
-        document.getElementById('employeeId').value = emp.employeeId;
-        document.getElementById('employeeName').value = emp.employeeName;
-        document.getElementById('employeeDept').value = emp.employeeDept;
-        // Photo handling
-        document.getElementById('employeePhoto').value = ""; // Reset photo input value before showing
-        document.getElementById('employeePhoto').dataset.preview = emp.employeePhoto; // Store as preview
-        document.getElementById('employeeEditIndex').value = emp.employeeId;
-      }
-    }).catch(() => {
-      alert("Error fetching employee details for editing");
-    });
-  } else {
-    title.textContent = 'Add Employee';
+  const idPattern = /^[A-Z0-9]+$/;
+
+  if (!id || !name || !dept) {
+    alert("⚠️ กรุณากรอกข้อมูลให้ครบทุกช่อง");
+    return false;
   }
 
-  modal.style.display = 'flex';
+  if (!idPattern.test(id)) {
+    alert(
+      "⚠️ Employee ID ต้องเป็นตัวอักษรภาษาอังกฤษหรือตัวเลขเท่านั้น (A-Z, 0-9)"
+    );
+    return false;
+  }
+
+  if (!editId) {
+    const exists = await checkIfEmployeeExists(id);
+    if (exists) {
+      alert("❌ มี Employee ID นี้ในระบบแล้ว");
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function openEmployeeForm(id = null) {
+  const modal = document.getElementById("employeeFormModal");
+  const title = document.getElementById("employeeModalTitle");
+  const idField = document.getElementById("employeeId");
+  clearForm();
+
+  if (id) {
+    title.textContent = "Edit Employee";
+    document.getElementById('employeeId').disabled = true;
+    getEmployee(id)
+      .then((emp) => {
+        if (emp) {
+          idField.value = emp.employeeId;
+          idField.disabled = true;
+          document.getElementById("employeeName").value = emp.employeeName;
+          document.getElementById("employeeDept").value = emp.employeeDept;
+          document.getElementById("employeePhoto").value = "";
+          document.getElementById("employeePhoto").dataset.preview =
+            emp.employeePhoto;
+          document.getElementById("employeeEditIndex").value = emp.employeeId;
+        }
+      })
+      .catch(() => {
+        alert("Error fetching employee details for editing");
+      });
+  } else {
+    idField.disabled = false;
+    title.textContent = "Add Employee";
+    document.getElementById('employeeId').disabled = false;
+  }
+
+  modal.style.display = "flex";
 }
 
 function deleteEmployee() {
@@ -90,7 +132,7 @@ function deleteEmployee() {
     return;
   }
 
-  const transaction = db.transaction([STORE_NAME], 'readwrite');
+  const transaction = db.transaction([STORE_NAME], "readwrite");
   const store = transaction.objectStore(STORE_NAME);
   store.delete(currentDeleteId);
 
@@ -107,7 +149,7 @@ function deleteEmployee() {
 
 function getEmployee(id) {
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_NAME], 'readonly');
+    const transaction = db.transaction([STORE_NAME], "readonly");
     const store = transaction.objectStore(STORE_NAME);
     const request = store.get(id);
     request.onsuccess = () => resolve(request.result);
@@ -116,33 +158,29 @@ function getEmployee(id) {
 }
 
 // ==================== Save Employee with Duplicate ID Check ====================
-function saveEmployee() {
-  const id = document.getElementById('employeeId').value.trim();
-  const name = document.getElementById('employeeName').value.trim();
-  const dept = document.getElementById('employeeDept').value.trim();
-  const photoInput = document.getElementById('employeePhoto');
+async function saveEmployee() {
+  const isValid = await validateEmployeeForm(); // ✅ ใช้ await
+
+  if (!isValid) return;
+
+  const id = document.getElementById("employeeId").value.trim();
+  const name = document.getElementById("employeeName").value.trim();
+  const dept = document.getElementById("employeeDept").value.trim();
+  const photoInput = document.getElementById("employeePhoto");
   const file = photoInput.files[0];
 
-  // ถ้าชื่อหรือตำแหน่งว่าง ให้แจ้งเตือน
-  if (!id || !name || !dept) {
-    alert('Please fill in all fields!');
-    return;
-  }
-
-  // กำหนดค่า employeePhoto ถ้าไม่เลือกไฟล์ใหม่ให้ใช้รูปเดิม
   let employeePhoto = "";
   if (file) {
-    // ถ้ามีการเลือกไฟล์ใหม่
     const reader = new FileReader();
     reader.onload = function (e) {
       employeePhoto = e.target.result;
-      saveToDatabase(id, name, dept, employeePhoto);  // บันทึกข้อมูลไปยังฐานข้อมูล
+      saveToDatabase(id, name, dept, employeePhoto);
     };
     reader.readAsDataURL(file);
   } else {
-    // ถ้าไม่มีการเลือกไฟล์ใหม่ ให้ใช้รูปเดิมจากฐานข้อมูล
-    employeePhoto = document.getElementById('employeePhoto').dataset.preview || "";  // ใช้รูปเดิม
-    saveToDatabase(id, name, dept, employeePhoto);  // บันทึกข้อมูลไปยังฐานข้อมูล
+    employeePhoto =
+      document.getElementById("employeePhoto").dataset.preview || "";
+    saveToDatabase(id, name, dept, employeePhoto);
   }
 }
 
@@ -151,23 +189,24 @@ function saveToDatabase(id, name, dept, employeePhoto) {
     employeeId: id,
     employeeName: name,
     employeeDept: dept,
-    employeePhoto: employeePhoto
+    employeePhoto: employeePhoto,
   };
 
-  const transaction = db.transaction([STORE_NAME], 'readwrite');
+  const transaction = db.transaction([STORE_NAME], "readwrite");
   const store = transaction.objectStore(STORE_NAME);
   store.put(emp);
 
   transaction.oncomplete = () => {
-    toggleEmployeeModal(false);  // ปิด modal หลังจากบันทึกข้อมูลเสร็จ
-    renderEmployeeTable();       // รีเฟรชตารางแสดงข้อมูล
+    alert("✅ บันทึกข้อมูลพนักงานสำเร็จ");
+    toggleEmployeeModal(false);
+    renderEmployeeTable();
   };
 }
 
 // ==================== Check if Employee ID Exists ====================
 function checkIfEmployeeExists(id) {
   return new Promise((resolve) => {
-    const transaction = db.transaction([STORE_NAME], 'readonly');
+    const transaction = db.transaction([STORE_NAME], "readonly");
     const store = transaction.objectStore(STORE_NAME);
     const request = store.get(id);
     request.onsuccess = () => resolve(request.result !== undefined);
@@ -176,13 +215,15 @@ function checkIfEmployeeExists(id) {
 
 // ==================== Render Employee Table ====================
 function renderEmployeeTable() {
-  const tbody = document.getElementById('employeeTableBody');
-  const keyword = document.getElementById('searchEmployee').value.toLowerCase();
-  tbody.innerHTML = '';
+  const tbody = document.getElementById("employeeTableBody");
+  const keyword = document.getElementById("searchEmployee").value.toLowerCase();
+  tbody.innerHTML = "";
 
   getAllEmployees().then((employees) => {
-    const filteredEmployees = employees.filter(emp => 
-      emp.employeeId.toLowerCase().includes(keyword) || emp.employeeName.toLowerCase().includes(keyword)
+    const filteredEmployees = employees.filter(
+      (emp) =>
+        emp.employeeId.toLowerCase().includes(keyword) ||
+        emp.employeeName.toLowerCase().includes(keyword)
     );
 
     if (filteredEmployees.length === 0) {
@@ -191,7 +232,7 @@ function renderEmployeeTable() {
     }
 
     filteredEmployees.forEach((emp) => {
-      const tr = document.createElement('tr');
+      const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${emp.employeeId}</td>
         <td>${emp.employeeName}</td>
@@ -209,7 +250,7 @@ function renderEmployeeTable() {
 // ==================== Fetch All Employees ====================
 function getAllEmployees() {
   return new Promise((resolve) => {
-    const transaction = db.transaction([STORE_NAME], 'readonly');
+    const transaction = db.transaction([STORE_NAME], "readonly");
     const store = transaction.objectStore(STORE_NAME);
     const request = store.getAll();
     request.onsuccess = () => resolve(request.result);
@@ -219,7 +260,7 @@ function getAllEmployees() {
 // ==================== Fetch Employee by ID ====================
 function getEmployee(id) {
   return new Promise((resolve) => {
-    const transaction = db.transaction([STORE_NAME], 'readonly');
+    const transaction = db.transaction([STORE_NAME], "readonly");
     const store = transaction.objectStore(STORE_NAME);
     const request = store.get(id);
     request.onsuccess = () => resolve(request.result);
@@ -229,7 +270,7 @@ function getEmployee(id) {
 // ==================== Delete Employee ====================
 function deleteEmployee() {
   if (!currentDeleteId) return;
-  const transaction = db.transaction([STORE_NAME], 'readwrite');
+  const transaction = db.transaction([STORE_NAME], "readwrite");
   const store = transaction.objectStore(STORE_NAME);
   store.delete(currentDeleteId);
 
@@ -243,15 +284,20 @@ function deleteEmployee() {
 let currentDeleteId = null;
 
 function toggleDeleteModal(show, id = null) {
-  document.getElementById('deleteModal').style.display = show ? 'flex' : 'none';
+  document.getElementById("deleteModal").style.display = show ? "flex" : "none";
   currentDeleteId = id;
 }
 
 // ==================== Mock Data for Employees ====================
 async function generateMockData() {
-  const departments = ['Research and Development'];
-  const employeeNames = Array.from({ length: 20 }, (_, i) => `EmployeeName${String(i + 1).padStart(3, '0')}`);
-  const employeePhotos = ['https://cdn-icons-png.flaticon.com/512/2919/2919906.png'];
+  const departments = ["Research and Development"];
+  const employeeNames = Array.from(
+    { length: 20 },
+    (_, i) => `EmployeeName${String(i + 1).padStart(3, "0")}`
+  );
+  const employeePhotos = [
+    "https://cdn-icons-png.flaticon.com/512/2919/2919906.png",
+  ];
 
   for (let i = 0; i < 20; i++) {
     const employeeId = `EMP${1000 + i}`;
@@ -261,7 +307,7 @@ async function generateMockData() {
 
     const employee = { employeeId, employeeName, employeeDept, employeePhoto };
 
-    const transaction = db.transaction([STORE_NAME], 'readwrite');
+    const transaction = db.transaction([STORE_NAME], "readwrite");
     const store = transaction.objectStore(STORE_NAME);
     store.put(employee);
 
@@ -269,7 +315,7 @@ async function generateMockData() {
       console.log(`Employee ${employeeId} added successfully!`);
     };
     transaction.onerror = (e) => {
-      console.error('Error inserting employee:', e.target.error);
+      console.error("Error inserting employee:", e.target.error);
     };
   }
 
@@ -284,8 +330,9 @@ function exportEmployees() {
     }
 
     const csvHeader = "Employee ID,Name,Department,Photo\n";
-    const csvRows = employees.map(emp =>
-      `"${emp.employeeId}","${emp.employeeName}","${emp.employeeDept}","${emp.employeePhoto}"`
+    const csvRows = employees.map(
+      (emp) =>
+        `"${emp.employeeId}","${emp.employeeName}","${emp.employeeDept}","${emp.employeePhoto}"`
     );
     const csvContent = csvHeader + csvRows.join("\n");
 
@@ -312,7 +359,9 @@ function importEmployees(event) {
 
   const reader = new FileReader();
   reader.onload = function (e) {
-    const lines = e.target.result.split("\n").filter(line => line.trim() !== "");
+    const lines = e.target.result
+      .split("\n")
+      .filter((line) => line.trim() !== "");
     if (lines.length <= 1) {
       alert("❗ CSV file is empty or missing header.");
       return;
@@ -320,16 +369,23 @@ function importEmployees(event) {
 
     const employees = [];
     for (let i = 1; i < lines.length; i++) {
-      const [id, name, dept, photo] = lines[i].split(",").map(cell => cell.replace(/"/g, "").trim());
+      const [id, name, dept, photo] = lines[i]
+        .split(",")
+        .map((cell) => cell.replace(/"/g, "").trim());
       if (!id || !name || !dept || !photo) continue;
 
-      employees.push({ employeeId: id, employeeName: name, employeeDept: dept, employeePhoto: photo });
+      employees.push({
+        employeeId: id,
+        employeeName: name,
+        employeeDept: dept,
+        employeePhoto: photo,
+      });
     }
 
     const transaction = db.transaction([STORE_NAME], "readwrite");
     const store = transaction.objectStore(STORE_NAME);
 
-    employees.forEach(emp => store.put(emp));
+    employees.forEach((emp) => store.put(emp));
 
     transaction.oncomplete = () => {
       alert("✅ Import complete!");
@@ -346,14 +402,14 @@ function importEmployees(event) {
 }
 
 function clearForm() {
-  document.getElementById('employeeId').value = '';
-  document.getElementById('employeeName').value = '';
-  document.getElementById('employeeDept').value = '';
-  document.getElementById('employeePhoto').value = '';  // รีเซ็ตรูปถ่ายที่เลือก
-  document.getElementById('employeeEditIndex').value = ''; // รีเซ็ต hidden input
+  document.getElementById("employeeId").value = "";
+  document.getElementById("employeeName").value = "";
+  document.getElementById("employeeDept").value = "";
+  document.getElementById("employeePhoto").value = ""; // รีเซ็ตรูปถ่ายที่เลือก
+  document.getElementById("employeeEditIndex").value = ""; // รีเซ็ต hidden input
 }
 
 function toggleEmployeeModal(show) {
-  const modal = document.getElementById('employeeFormModal');
-  modal.style.display = show ? 'flex' : 'none'; // เปิดหรือปิด Modal
+  const modal = document.getElementById("employeeFormModal");
+  modal.style.display = show ? "flex" : "none"; // เปิดหรือปิด Modal
 }

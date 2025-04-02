@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RD-WASH | Inventory</title>
+  <link rel="stylesheet" href="./css/inventory.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+
+  <!-- 🔷 HEADER -->
+  <header class="header">
+    <h2><i class="fas fa-box"></i>Inventory Management</h2>
+  </header>
+
+  <!-- 🔷 CONTROL PANEL -->
+  <section class="header-controls">
+    <input type="text" id="searchInventory" placeholder="🔍 Search by Uniform Name or Color" />
+    <button class="btn" id="addInventoryBtn">➕ Add Uniform</button>
+    <button class="btn" onclick="generateInventoryMock()">📦 Generate Mock Data</button>
+  </section>
+
+  <!-- 🔷 CARD GRID -->
+  <main>
+    <h3><i class="fas fa-list"></i> Uniform List</h3>
+    <section class="card-grid" id="inventoryList">
+      <!-- Cards will be injected by JavaScript -->
+    </section>
+  </main>
+
+  <!-- 🔷 MODAL FORM -->
+  <div class="modal" id="inventoryModal">
+    <div class="modal-content">
+      <h3 id="modalTitle">Add Uniform</h3>
+      <form id="inventoryForm">
+        <input type="hidden" id="inventoryId" />
+
+        <label for="UniformName">Uniform Name</label>
+        <input type="text" id="UniformName" required placeholder="e.g. Cleanroom Jacket" />
+
+        <label for="UniformSize">Size</label>
+        <input type="text" id="UniformSize" required placeholder="e.g. M, L, XL" />
+
+        <label for="UniformColor">Color</label>
+        <input type="text" id="UniformColor" required placeholder="e.g. Blue, White" />
+
+        <label for="UniformQty">Quantity</label>
+        <input type="number" id="UniformQty" required min="1" placeholder="Stock quantity" />
+
+        <label for="UniformPicture">Picture</label>
+        <input type="file" id="UniformPicture" accept="image/*" />
+
+        <div class="modal-actions">
+          <button type="submit" class="btn-save">💾 Save</button>
+          <button type="button" class="btn-cancel" onclick="closeInventoryModal()">❌ Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 🔷 FOOTER -->
+  <footer class="footer">
+    <p>&copy; 2025 RD Wash System.</p>
+  </footer>
+
+  <script src="./js/inventory.js"></script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RD-WASH | Uniform Inventory</title>
+  <link rel="stylesheet" href="/test/test.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+
+  <!-- 🔷 HEADER -->
+  <header class="header">
+    <h2><i class="fas fa-shirt"></i> Uniform Inventory Management</h2>
+  </header>
+
+  <!-- 🔷 DASHBOARD SUMMARY -->
+  <section class="dashboard-summary">
+    <div class="summary-card"><i class="fas fa-user"></i><span>In Use</span><span id="summaryInUse">2</span></div>
+    <div class="summary-card"><i class="fas fa-box"></i><span>Available</span><span id="summaryActual">3</span></div>
+    <div class="summary-card"><i class="fas fa-boxes-stacked"></i><span>Other</span><span id="summaryOther">1</span></div>
+    <div class="summary-card"><i class="fas fa-database"></i><span>Total</span><span id="summaryTotal">6</span></div>
+  </section>
+
+  <!-- 🔷 UNIFORM LIST -->
+  <section class="uniform-filters">
+    <input type="text" id="searchUniform" placeholder="🔍 Search by Name or Color..." />
+    <button onclick="generateMockData()">📦 Generate Mock Data</button>
+  </section>
+
+  <!-- 🔷 UNIFORM CARD LIST -->
+  <main>
+    <section class="uniform-card-list" id="uniformCardList">
+      <!-- Static Uniform Cards -->
+      <div class="inventory-card">
+        <div class="actions">
+          <button class="addUniform"><i class="fas fa-shirt"></i></button>
+          <button class="addAssign"><i class="fas fa-user"></i></button>
+          <button class="detail"><i class="fas fa-eye"></i></button>
+        </div>
+        <img src="https://via.placeholder.com/240x140?text=No+Image" alt="Cleanroom Jacket" />
+        <h4>Cleanroom Jacket</h4>
+        <p>Size: M | Color: White</p>
+        <div class="qty"><i class="fas fa-box"></i> 20</div>
+      </div>
+
+      <div class="inventory-card">
+        <div class="actions">
+          <button class="addUniform"><i class="fas fa-shirt"></i></button>
+          <button class="addAssign"><i class="fas fa-user"></i></button>
+          <button class="detail"><i class="fas fa-eye"></i></button>
+        </div>
+        <img src="https://via.placeholder.com/240x140?text=No+Image" alt="Cleanroom Jacket" />
+        <h4>Cleanroom Jacket</h4>
+        <p>Size: M | Color: White</p>
+        <div class="qty"><i class="fas fa-box"></i> 20</div>
+      </div>
+      
+      <div class="inventory-card">
+        <div class="actions">
+          <button class="addUniform"><i class="fas fa-shirt"></i></button>
+          <button class="addAssign"><i class="fas fa-user"></i></button>
+          <button class="detail"><i class="fas fa-eye"></i></button>
+        </div>
+        <img src="https://via.placeholder.com/240x140?text=No+Image" alt="Cleanroom Jacket" />
+        <h4>Cleanroom Jacket</h4>
+        <p>Size: M | Color: White</p>
+        <div class="qty"><i class="fas fa-box"></i> 20</div>
+      </div>
+
+
+    </section>
+  </main>
+
+  <!-- 🔷 MODAL: ADD UNIFORM -->
+  <div class="modal-1" id="modalAddUniform">
+    <div class="modal-content">
+      <h3><i class="fas fa-plus-circle"></i> Add Uniform</h3>
+      <form id="formAddUniform">
+        <input type="hidden" id="uniformId" />
+
+        <label for="uniformCode">UniformCode</label>
+        <input type="text" id="UniformCode" value="RD-2024-4XL-015" required style="background-color:darkgray;"/>
+
+        <label for="uniformSize">Size</label>
+        <input type="text" id="uniformSize" value="M" required readonly style="background-color:darkgrey;",style="text" />
+
+        <label for="uniformColor">Color</label>
+        <input type="text" id="uniformColor" value="White" required readonly/>
+
+        <label for="uniformQty">Quantity</label>
+        <input type="number" id="uniformQty" min="1" max="1" value="1" required />
+
+        <div class="modal-actions">
+          <button type="submit" class="btn-save"><i class="fas fa-save"></i> Save</button>
+          <button type="button" class="btn-cancel" onclick="closeModal('modalAddUniform')"><i class="fas fa-ban"></i> Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 🔷 FOOTER -->
+  <footer class="footer">
+    <p>&copy; 2025 RD-WASH System</p>
+  </footer>
+</body>
+</html>

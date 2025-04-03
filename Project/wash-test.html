@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RD Wash Management</title>
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="css/wash.css">
+</head>
+
+<body>
+
+  <!-- 🔷 HEADER -->
+  <header class="header">
+    <h2><i class="fas fa-soap"></i> RD Wash Management</h2>
+  </header>
+
+  <!-- 🔷 DASHBOARD SUMMARY -->
+  <section class="summary-cards">
+    <div class="card total">
+      <div class="icon">📋</div>
+      <div class="info">
+        <div class="title">Total</div>
+        <div id="sumTotal" class="number">0</div>
+      </div>
+    </div>
+    <div class="card waiting">
+      <div class="icon">⏳</div>
+      <div class="info">
+        <div class="title">Waiting</div>
+        <div id="sumWaiting" class="number">0</div>
+      </div>
+    </div>
+    <div class="card washing">
+      <div class="icon">🧺</div>
+      <div class="info">
+        <div class="title">Washing</div>
+        <div id="sumWashing" class="number">0</div>
+      </div>
+    </div>
+    <div class="card completed">
+      <div class="icon">✅</div>
+      <div class="info">
+        <div class="title">Completed</div>
+        <div id="sumCompleted" class="number">0</div>
+      </div>
+    </div>
+    <div class="card rewash">
+      <div class="icon">🔁</div>
+      <div class="info">
+        <div class="title">Rewash</div>
+        <div id="sumRewash" class="number">0</div>
+      </div>
+    </div>
+    <div class="card scrap">
+      <div class="icon">🗑️</div>
+      <div class="info">
+        <div class="title">Scrap</div>
+        <div id="sumScrap" class="number">0</div>
+      </div>
+    </div>
+    <div class="card history">
+      <div class="icon">📖</div>
+      <div class="info">
+        <div class="title">History</div>
+        <div id="sumHistory" class="number">0</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 🔷 HEADER CONTROLS -->
+
+
+  <!-- 🔷 MAIN SECTION -->
+  <main>
+    <section class="data-section">
+      <div class="header-controls">
+        <div class="title-table">
+          <h3><i class="fas fa-history"></i> Current Wash Jobs</h3>
+        </div>
+        <div class="control-table">
+          <input type="text" id="search" placeholder="🔎 Search Employee ID / Code">
+          <button class="btn" onclick="openForm()">➕ Add Wash</button>
+          <select id="filterStatus">
+            <option value="">All Status</option>
+            <option value="Waiting to Send">Waiting</option>
+            <option value="Washing">Washing</option>
+            <option value="Waiting Rewash #1">Waiting Rewash #1</option>
+            <option value="Waiting Rewash #2">Waiting Rewash #2</option>
+            <option value="Waiting Rewash #3">Waiting Rewash #3</option>
+            <option value="Completed">Completed</option>
+          </select>
+        </div>
+
+      </div>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>WashID</th>
+            <th>EmpID</th>
+            <th>Name</th>
+            <th>Department</th>
+            <th>Uniform</th>
+            <th>Color</th>
+            <th>Qty</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="washTableBody"></tbody>
+      </table>
+
+    </section>
+
+    <section class="data-section">
+      <h3><i class="fas fa-history"></i> Wash History</h3>
+      <table class="data-table  ">
+        <thead>
+          <tr>
+            <th>Completed</th>
+            <th>WashID</th>
+            <th>EmpID</th>
+            <th>Name</th>
+            <th>Uniform</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="historyTableBody"></tbody>
+
+      </table>
+    </section>
+    <div id="pagination" style="margin-top:s 20px; text-align: center;"></div>
+  </main>
+
+  <!-- MODAL FORM -->
+  <div class="modal" id="Modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close" onclick="toggleModal(false)">&times;</span>
+      <h3 id="modalTitle">Add Wash Job</h3>
+
+      <label for="uniformCode">Uniform Code</label>
+      <input type="text" id="uniformCode" onchange="loadColorsForUniform()">
+
+      <label for="color">Color</label>
+      <select id="color">
+        <option value="" disabled>Select Color</option>
+        <option value="White">White</option>
+        <option value="Green">Green</option>
+        <option value="Yellow">Yellow</option>
+      </select>
+
+      <label for="qty">Quantity</label>
+      <input type="number" id="qty" min="1" max="1" value="1" readonly />
+
+      <label for="empId">Employee ID</label>
+      <input type="text" id="empId" readonly />
+
+      <label for="empName">Employee Name</label>
+      <input type="text" id="empName" readonly title="ระบบจะค้นหาชื่อพนักงานโดยอัตโนมัติจาก Uniform Code" />
+
+      <label for="department">Department</label>
+      <input type="text" id="department" readonly />
+
+      <input type="hidden" id="editIndex" />
+      <div class="modal-actions">
+        <button class="btn-save" onclick="saveWash()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🔷 FOOTER -->
+  <footer class="footer">
+    <p>&copy; 2025 RD Wash System.</p>
+  </footer>
+
+  <!-- ✅ JS -->
+  <script type="module" src="./js/wash-firebase.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js">

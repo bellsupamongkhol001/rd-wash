@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+    
+      <!-- 🔷 HEADER -->
+  <header class="header">
+    <h2><i class="fas fa-box"></i> Inventory Management</h2>
+  </header>
+
+    <!-- 🔷 CONTROL PANEL -->
+    <section class="header-controls">
+        <input type="text" id="searchInventory" placeholder="🔍 Search by Uniform Name or Color" />
+        <button class="btn" onclick="generateInventoryMock()">📦 Generate Mock Data</button>
+    </section>
+
+      <!-- 🔷 CARD GRID -->
+  <main>
+    <h3><i class="fas fa-list"></i> Inventory List</h3>
+    <section class="card-grid" id="inventoryList">
+        <div class="inventory-card">
+            <div class="actions">
+              <button class="addUniform"><i class="fas fa-add"></i></button>
+              <button class="addAssign"><i class="fas fa-user"></i></button>
+              <button class="detailUniform"><i class="fas fa-eye"></i></button>
+            </div>
+
+            <img src="https://via.placeholder.com/240x140?text=Uniform" alt="Uniform Image" />
+                <h4>UniformName</h4>
+                <p>Size: M | Color: White</p>
+                <div class="qty">
+                    <p><i class="fas fa-box"></i></p>
+                    <p><strong>20</strong></p>
+                    <p>Qty</p>
+                </div>
+          </div>
+    </section>
+
+    <!-- 🔷 MODAL ADD Uniform -->
+
+    <div class="modal" id="addUniformModal">
+    <div class="modal-content">
+        
+      <h3 id="modalTitle">Add Uniform</h3>
+      
+      <form id="inventoryForm">
+
+        <input type="hidden" id="UniformID" readonly>
+        
+        <label for="UniformName">Name</label>
+        <input type="text" id="UniformName" readonly>
+
+        <label for="UniformCode">Code</label>
+        <input type="text" id="UniformCode" />
+        
+        <label for="UniformSize">Size</label>
+        <input type="text" id="UniformSize">
+
+        <label for="UniformColor">Color</label>
+        <input type="text" id="UniformColor">
+
+        <label for="UniformQty">Qty</label>
+        <input type="number" id="UniformQty" value="1" readonly>
+
+        <div class="modal-actions">
+          <button type="submit" class="btn-save">💾 Save</button>
+          <button type="button" class="btn-cancel" onclick="closeInventoryModal()">❌ Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 🔷 MODAL ADD Assign -->
+  <div class="modal" id="addAssignModal">
+    <div class="modal-content">
+        
+      <h3 id="modalTitle">Add Assign</h3>
+      
+      <form id="inventoryForm">
+
+        <input type="hidden" id="UniformID" readonly>
+        
+        <label for="UniformName">UniformName</label>
+
+        <label for="UniformCode">UniformCode</label>
+        <select id="UniformCode">
+            <option value="" selected disabled>-----Select UniformCode-----</option>
+            <option value="Code1">RD-2024-4XL-015</option>
+            <option value="Code2">RD-2024-4XL-016</option>
+            <option value="Code3">RD-2024-4XL-017</option>
+        </select>
+        
+        <label for="UniformSize">Size</label>
+        <input type="text" id="UniformSize">
+        
+        <label for="UniformColor">Color</label>
+        <input type="text" id="UniformColor">
+
+        <label for="UniformQty">Qty</label>
+        <input type="number" value="1" readonly>
+
+        <label for="EmployeeID">EmployeeID</label>
+        <input type="text" id="EmployeeID" required>
+
+        <label for="EmployeeName">Name</label>
+        <input type="text" id="EmployeeName">
+
+        <label for="Department">Department</label>
+        <input type="text" id="Department">
+
+        <div class="modal-actions">
+          <button type="submit" class="btn-save">💾 Save</button>
+          <button type="button" class="btn-cancel" onclick="closeInventoryModal()">❌ Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+   <!-- 🔷 MODAL Detail Uniform -->
+   <div class="modal" id="detailModal">
+    <div class="modal-content">
+        
+      <h3 id="modalTitle">Detail Uniform</h3>
+      
+      <h3>UniformName|UniformSize|UniformColor|UniformQty</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>UniformCode</th>
+                    <th>Assign EmpID</th>
+                    <th>Assing EmpName</th>
+                    <th>Department</th>
+                    <th>Qty</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>RD-2024-4XL-001</td>
+                    <td>C250W8</td>
+                    <td>Supamongkhol Mangchu</td>
+                    <td>RD</td>
+                    <td>1</td>
+                    <td>In Use</td>
+                    <td>
+                        <button class="btn-edit">Edit</button>
+                        <button class="btn-delete">Delete</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>RD-2024-4XL-002</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>1</td>
+                    <td>In Stock</td>
+                    <td>
+                        <button class="btn-edit">Edit</button>
+                        <button class="btn-delete">Delete</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>RD-2024-4XL-003</td>
+                    <td>-</td>
+                    <td></td>
+                    <td>RD</td>
+                    <td>1</td>
+                    <td>Washing</td>
+                    <td>
+                        <button class="btn-edit">Edit</button>
+                        <button class="btn-delete">Delete</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RD Wash Management</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Segoe+UI&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="css/wash.css" />
+  </head>
+
+  <body>
+    <!-- Header -->
+    <header class="header">
+      <h2><i class="fas fa-soap"></i> RD Wash Management</h2>
+    </header>
+
+    <!-- Summary Cards -->
+    <section class="summary-cards">
+      <div class="card total">
+        <div class="icon">📋</div>
+        <div class="info">
+          <div class="title">Total</div>
+          <div id="sumTotal" class="number">0</div>
+        </div>
+      </div>
+      <div class="card waiting">
+        <div class="icon">⏳</div>
+        <div class="info">
+          <div class="title">Waiting</div>
+          <div id="sumWaiting" class="number">0</div>
+        </div>
+      </div>
+      <div class="card washing">
+        <div class="icon">🧺</div>
+        <div class="info">
+          <div class="title">Washing</div>
+          <div id="sumWashing" class="number">0</div>
+        </div>
+      </div>
+      <div class="card completed">
+        <div class="icon">✅</div>
+        <div class="info">
+          <div class="title">Completed</div>
+          <div id="sumCompleted" class="number">0</div>
+        </div>
+      </div>
+      <div class="card rewash">
+        <div class="icon">🔁</div>
+        <div class="info">
+          <div class="title">Rewash</div>
+          <div id="sumRewash" class="number">0</div>
+        </div>
+      </div>
+      <div class="card scrap">
+        <div class="icon">🗑️</div>
+        <div class="info">
+          <div class="title">Scrap</div>
+          <div id="sumScrap" class="number">0</div>
+        </div>
+      </div>
+      <div class="card history">
+        <div class="icon">📖</div>
+        <div class="info">
+          <div class="title">History</div>
+          <div id="sumHistory" class="number">0</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Content -->
+    <main>
+      <!-- Wash Job Section -->
+      <section class="data-section">
+        <div class="header-controls">
+          <div class="title-table">
+            <h3><i class="fas fa-tasks"></i> Current Wash Jobs</h3>
+          </div>
+          <div class="control-table">
+            <input
+              type="text"
+              id="searchWashjobs"
+              placeholder="🔎 Search EmpID / UniID"
+            />
+            <select id="filterStatusWashjobs">
+              <option value>All Status</option>
+              <option value="Waiting to Send">Waiting to Send</option>
+              <option value="Washing">Washing</option>
+              <option value="Waiting Rewash #1">Waiting Rewash #1</option>
+              <option value="Waiting Rewash #2">Waiting Rewash #2</option>
+              <option value="Waiting Rewash #3">Waiting Rewash #3</option>
+              <option value="Completed">Completed</option>
+            </select>
+            <button class="btn btn-add" id="btnAddWash">➕ Add Wash</button>
+          </div>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>WashID</th>
+              <th>UniformID</th>
+              <th>Employee</th>
+              <th>Color</th>
+              <th>Qty</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="washTableBody"></tbody>
+        </table>
+        <div id="pagination" class="pagination"></div>
+      </section>
+
+      <!-- Wash History Section -->
+      <section class="data-section">
+        <div class="header-controls">
+          <div class="title-table">
+            <h3><i class="fas fa-history"></i> Wash History</h3>
+          </div>
+          <div class="control-table">
+            <input
+              type="text"
+              id="searchHistory"
+              placeholder="🔎 Search EmpID / UniID"
+            />
+            <button class="btn btn-export" onclick="exportWashTableToCSV()">
+              <i class="fas fa-file-csv"></i> Export CSV
+            </button>
+          </div>
+        </div>
+
+        <div id="historyTableWrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Wash ID</th>
+                <th>UniformID</th>
+                <th>Employee</th>
+                <th>ESD Result</th>
+                <th>Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody"></tbody>
+          </table>
+          <div id="historyPagination" class="pagination"></div>
+        </div>
+      </section>
+    </main>
+
+    <div class="modal" id="addWashModal">
+      <div class="modal-content">
+        <h3 class="modal-title-center">➕ Add Wash Job</h3>
+        <div class="modal-body">
+          <div class="modal-left">
+            <div class="photo-wrapper">
+              <img
+                id="addEmpPhoto"
+                src="https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?t=st=1743905259~exp=1743908859~hmac=a7496a5748a000bfe675cf2c595b12f5c48a3bbf2d7d66964720ece61f869823&w=900"
+                alt="Employee Photo"
+              />
+            </div>
+            <div class="emp-info" id="addEmpId">EMPID: -</div>
+            <div class="emp-info" id="addEmpName">Name: -</div>
+            <div class="emp-dept" id="addEmpDept">Department: -</div>
+          </div>
+
+          <div class="modal-right">
+            <label for="addUniformCode">Uniform Code</label>
+            <input type="text" id="addUniformCode" />
+
+            <label for="addUniformName">Uniform Name</label>
+            <input type="text" id="addUniformName" />
+
+            <label for="addSize">Size</label>
+            <input type="text" id="addSize" />
+
+            <label for="addColor">Color</label>
+            <select id="addColor">
+              <option value>Select...</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn btn-success" onclick="handleAddWash()">
+            ✅ Confirm
+          </button>
+          <button class="btn btn-danger" onclick="cancelAddWash()">
+            ❌ Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="viewWashModal">
+      <div class="modal-content compact">
+        <h3 class="modal-title-center">📄 รายละเอียด Wash Job</h3>
+        <div class="modal-body">
+          <div class="modal-left">
+            <div class="photo-wrapper">
+              <img id="viewEmpPhoto" src="default.jpg" alt="Employee Photo" />
+            </div>
+            <div class="emp-info" id="viewEmpId">EMPID: -</div>
+            <div class="emp-info" id="viewEmpName">Name: -</div>
+            <div class="emp-dept" id="viewEmpDept">Department: -</div>
+          </div>
+
+          <div class="modal-right">
+            <label>Uniform Code</label>
+            <p class="readonly-field" id="viewUniformCode">-</p>
+
+            <label>Uniform Name</label>
+            <p class="readonly-field" id="viewUniformName">-</p>
+
+            <label>Size</label>
+            <p class="readonly-field" id="viewSize">-</p>
+
+            <label>Color</label>
+            <p class="readonly-field" id="viewColor">-</p>
+
+            <label>Quantity</label>
+            <p class="readonly-field" id="viewQty">-</p>
+
+            <label>Status</label>
+            <p class="readonly-field" id="viewStatus">-</p>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn btn-cancel" onclick="closeModal('viewWashModal')">
+            ❌ Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="esdModal">
+      <div class="modal-content small">
+        <h3 class="modal-title-center">🧪 ESD Testing</h3>
+        <p style="text-align: center">
+          Please select ESD test result for: <b id="esdUniCode">-</b>
+        </p>
+        <div class="modal-actions center">
+          <button class="btn btn-success" onclick="handleESDResult('PASS')">
+            ✅ PASS
+          </button>
+          <button class="btn btn-danger" onclick="handleESDResult('NG')">
+            ❌ NG
+          </button>
+        </div>
+        <div class="modal-actions center">
+          <button class="btn btn-cancel" onclick="closeModal('esdModal')">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <p>&copy; 2025 RD Wash System.</p>
+    </footer>
+
+    <script type="module" src="./washViews/washView.js"></script>
+    <script type="module" src="./Controllers/washController.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+  </body>
+</html>

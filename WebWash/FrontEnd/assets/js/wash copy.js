@@ -57,7 +57,7 @@ async function getAll(collectionName) {
     console.error("❌ Error getting documents:", error); // 🛑 แสดง error ถ้าไม่สำเร็จ
     throw error;
   }
-}
+} //OK
 
 // ======================================================
 // ✏️ เพิ่มหรืออัปเดตข้อมูลใน Firestore (ระบุ ID เองได้)
@@ -72,7 +72,7 @@ async function put(collectionName, id, data) {
     console.error("❌ Error adding/updating document:", error);
     throw error;
   }
-}
+} //x
 
 // ======================================================
 // 🗑 ลบเอกสารจาก Firestore (ตาม ID และ Collection)
@@ -87,7 +87,7 @@ async function remove(collectionName, id) {
     console.error("❌ Error deleting document:", error);
     throw error;
   }
-}
+} //x
 
 // ======================================================
 // 🔍 ดึงเอกสารจาก Firestore โดยใช้ ID เดียว (เช่น ใช้ในการแก้ไข)

@@ -18,6 +18,7 @@ import {
   deleteDoc,
   query,
   where,
+  deleteField,
 } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -31,7 +32,6 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-
 
 const uniformRef = collection(db, "UniformsDB");
 const codeRef = collection(db, "InventoryDB");
@@ -73,13 +73,20 @@ async function renderTemplates() {
   const container = document.getElementById("inventoryList");
   container.innerHTML = "";
 
-  const uniforms = await getAll(uniformRef);
-  const codes = await getAll(codeRef);
+  const uniforms = await getAll(uniformRef); // ข้อมูล UniformsDB
+  const codes = await getAll(codeRef); // ข้อมูล InventoryDB
 
   for (const u of uniforms) {
-    const used = await calculateUsedStock(u.uniformId);
-    const total = codes.filter((c) => c.uniformId === u.uniformId).length;
+    const allCodes = codes.filter((c) => c.uniformId === u.uniformId);
+    const used = allCodes.filter((c) => c.status !== "available").length;
+    const available = allCodes.length - used;
 
+    // ✅ เพิ่มอัปเดต qty เข้า UniformsDB ให้ตรงตามจำนวน code จริง
+    await updateDoc(doc(db, "UniformsDB", u.uniformId), {
+      qty: allCodes.length,
+    });
+
+    // ✅ สร้างการ์ดแสดงผล
     const card = document.createElement("div");
     card.className = "inventory-card";
     card.innerHTML = `
@@ -87,14 +94,10 @@ async function renderTemplates() {
       <h4>${u.uniformName}</h4>
       <p><strong>Size:</strong> ${u.size}</p>
       <p><strong>Color:</strong> ${u.color}</p>
-      <p><strong>Stock:</strong> ${total - used} ชิ้น</p>
+      <p><strong>Stock:</strong> ${available} ชิ้น</p>
       <div class="actions">
-        <button class="btn" onclick="window.openAddCodeModal('${
-          u.uniformId
-        }')">➕ Add Code</button>
-        <button class="btn" onclick="window.viewDetail('${
-          u.uniformId
-        }')">🔍 View</button>
+        <button class="btn" onclick="window.openAddCodeModal('${u.uniformId}')">➕ Add Code</button>
+        <button class="btn" onclick="window.viewDetail('${u.uniformId}')">🔍 View</button>
       </div>
     `;
     container.appendChild(card);
@@ -119,7 +122,9 @@ window.saveUniformCode = async function (e) {
 
   const q = query(codeRef, where("uniformCode", "==", code));
   const snapshot = await getDocs(q);
-  const existsSameColor = snapshot.docs.some((doc) => doc.data().color === color);
+  const existsSameColor = snapshot.docs.some(
+    (doc) => doc.data().color === color
+  );
   if (existsSameColor) return showAlert("❌ โค้ดนี้ถูกใช้แล้วกับสีนี้");
 
   const newId = `${code}-${color}-${Date.now()}`;
@@ -133,21 +138,26 @@ window.saveUniformCode = async function (e) {
     employeeName: null,
     color,
     qty: 1,
-    rewashCount: 0
+    rewashCount: 0,
   });
 
-  const uniformDocRef = doc(db, "UniformsDB", uniformId);
-  const uniformSnap = await getDoc(uniformDocRef);
-  if (uniformSnap.exists()) {
-    const currentQty = uniformSnap.data().qty || 0;
-    await updateDoc(uniformDocRef, { qty: currentQty + 1 });
-  }
+  await increaseQtyInUniformsDB(uniformId);
 
   window.closeAddCodeModal();
   renderTemplates();
   showAlert("✅ เพิ่ม Uniform Code สำเร็จ");
 };
 
+// 📈 เพิ่ม qty ใน UniformsDB ทีละ 1
+async function increaseQtyInUniformsDB(uniformId) {
+  try {
+    const ref = doc(db, "UniformsDB", uniformId);
+    await updateDoc(ref, { qty: increment(1) });
+    console.log(`✅ เพิ่ม qty สำเร็จ +1 สำหรับ ${uniformId}`);
+  } catch (err) {
+    console.error("❌ เพิ่ม qty ไม่สำเร็จ:", err);
+  }
+}
 
 // ============================================================================
 // 📦 [closeAddCodeModal]
@@ -195,17 +205,15 @@ window.assignUniform = async function (code, uniformId) {
 
   await updateDoc(doc(db, "InventoryDB", docId), {
     status: "in-use",
-    washStatus: "in-use/ready",
     employeeId,
     employeeName,
-    assignedAt: new Date().toISOString()
+    assignedAt: new Date().toISOString(),
   });
 
   window.viewDetail(uniformId);
   renderTemplates();
   showAlert("✅ มอบชุดให้พนักงานเรียบร้อยแล้ว");
 };
-
 
 // ============================================================================
 // 🔄 [returnUniform]
@@ -214,9 +222,9 @@ window.assignUniform = async function (code, uniformId) {
 window.returnUniform = async function (docId, uniformId) {
   await updateDoc(doc(db, "InventoryDB", docId), {
     status: "available",
-    washStatus: "",
     employeeId: null,
     employeeName: null,
+    usageStatus: deleteField()
   });
 
   window.viewDetail(uniformId);
@@ -234,7 +242,9 @@ window.exportReport = async function () {
 
   codes.forEach((c) => {
     csv.push(
-      `${c.uniformCode},${c.status || "-"},${c.employeeId || "-"},${c.employeeName || "-"},${c.uniformId}`
+      `${c.uniformCode},${c.status || "-"},${c.employeeId || "-"},${
+        c.employeeName || "-"
+      },${c.uniformId}`
     );
   });
 
@@ -250,7 +260,6 @@ window.exportReport = async function () {
 
   alert("✅ Export complete");
 };
-
 
 // ============================================================================
 // 👁️ [viewDetail]
@@ -276,11 +285,21 @@ window.viewDetail = async function (uniformId) {
         <td>${code.color}</td>
         <td>${code.employeeId || "-"}</td>
         <td>${code.employeeName || "-"}</td>
-        <td>${code.washStatus}</td>
+        <td>${usageStatus}</td>
         <td>
-          ${showAssign ? `<button onclick="window.assignUniform('${code.uniformCode}', '${code.uniformId}')">📝 Assign</button>` : ""}
-          ${showReturn ? `<button onclick="window.returnUniform('${docId}', '${code.uniformId}')">🔄 Return</button>` : ""}
-          <button onclick="window.deleteCode('${docId}', '${code.uniformId}')">🗑️ Delete</button>
+          ${
+            showAssign
+              ? `<button onclick="window.assignUniform('${code.uniformCode}', '${code.uniformId}')">📝 Assign</button>`
+              : ""
+          }
+          ${
+            showReturn
+              ? `<button onclick="window.returnUniform('${docId}', '${code.uniformId}')">🔄 Return</button>`
+              : ""
+          }
+          <button onclick="window.deleteCode('${docId}', '${
+        code.uniformId
+      }')">🗑️ Delete</button>
         </td>
       `;
       tbody.appendChild(tr);
@@ -288,7 +307,6 @@ window.viewDetail = async function (uniformId) {
 
   modal.classList.add("show");
 };
-
 
 // ============================================================================
 // 🗑️ [deleteCode]
@@ -300,18 +318,14 @@ window.deleteCode = async function (codeId, uniformId) {
 
   await deleteDoc(doc(db, "InventoryDB", codeId));
 
-  const uniformRef = doc(db, "UniformsDB", uniformId);
-  const snap = await getDoc(uniformRef);
-  if (snap.exists()) {
-    const currentQty = snap.data().qty || 0;
-    await updateDoc(uniformRef, { qty: Math.max(0, currentQty - 1) });
-  }
+  // ✅ ลด qty ใน UniformsDB ด้วย
+  await decreaseQtyInUniformsDB(uniformId);
 
+  // ✅ รีเฟรช UI
   window.viewDetail(uniformId);
   renderTemplates();
   showAlert("✅ Deleted");
 };
-
 
 // ============================================================================
 // 📣 [showAlert]
@@ -463,7 +477,7 @@ document.getElementById("assignForm").addEventListener("submit", async (e) => {
 
   // 📝 อัปเดตข้อมูลใน Firestore → เปลี่ยนสถานะเป็น Assigned พร้อมแนบข้อมูลพนักงาน
   await updateDoc(doc(db, "InventoryDB", code), {
-    usageStatus: "in-use/ready", // ✅ ใช้ usageStatus แทน status เดิม
+    usageStatus: "in-use", // ✅ ใช้ usageStatus แทน status เดิม
     employeeId,
     employeeName,
     assignedAt: new Date().toISOString(),
@@ -479,8 +493,6 @@ document.getElementById("assignForm").addEventListener("submit", async (e) => {
   // ✅ แจ้งผลลัพธ์
   showAlert("✅ Uniform assigned successfully", "success");
 });
-
-
 
 // ==========================================================================
 // 🎯 ฟังก์ชันปิด Modal "Assign Uniform"
@@ -527,8 +539,8 @@ document.getElementById("assignForm").addEventListener("submit", async (e) => {
     return showAlert("⚠️ Invalid employee", "error");
 
   // 💾 อัปเดต Firestore → เปลี่ยน status เป็น Assigned
-  await updateDoc(doc(db, "InventoryDB", code), {
-    usageStatus: "in-use/ready",
+  await updateDoc(doc(db, "InventoryDB", docId), {
+    status: "in-use",
     employeeId,
     employeeName,
     assignedAt: new Date().toISOString(),
@@ -557,3 +569,49 @@ document.addEventListener("DOMContentLoaded", () => {
     ?.addEventListener("click", exportReport);
   renderTemplates();
 });
+
+async function updateQtyInUniformsDB(uniformId) {
+  try {
+    // ดึงข้อมูลจาก InventoryDB ที่ตรงกับ uniformId
+    const invRef = doc(db, "InventoryDB", uniformId);
+    const invSnap = await getDoc(invRef);
+
+    if (!invSnap.exists()) {
+      console.warn(`⚠️ ไม่พบ Uniform ใน InventoryDB: ${uniformId}`);
+      return;
+    }
+
+    const invData = invSnap.data();
+    const qty = invData.qty || 0;
+
+    // อัปเดต qty ใน UniformsDB
+    const uniRef = doc(db, "UniformsDB", uniformId);
+    await setDoc(uniRef, { qty }, { merge: true });
+
+    console.log(
+      `✅ อัปเดต qty ใน UniformsDB = ${qty} สำเร็จสำหรับ ${uniformId}`
+    );
+  } catch (error) {
+    console.error("❌ ไม่สามารถอัปเดต qty ใน UniformsDB:", error);
+  }
+}
+
+async function decreaseQtyInUniformsDB(uniformId) {
+  try {
+    const ref = doc(db, "UniformsDB", uniformId);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return;
+
+    const currentQty = snap.data().qty || 0;
+    const newQty = Math.max(0, currentQty - 1); // ไม่ให้ติดลบ
+
+    await updateDoc(ref, { qty: newQty });
+
+    console.log(`📉 ลด qty ของ ${uniformId} เหลือ ${newQty}`);
+  } catch (err) {
+    console.error("❌ ลด qty ไม่สำเร็จ:", err);
+  }
+}
+
+await deleteDoc(doc(db, "InventoryDB", uniformCode));
+await clearQtyInUniformsDB(uniformId);

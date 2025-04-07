@@ -147,7 +147,6 @@
   </div>
 </div>
 
-<!-- Confirm Delete Modal -->
 <div id="confirmModal" class="modal" style="display: none;">
   <div class="modal-content">
     <p>❓ คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลนี้?</p>
@@ -158,9 +157,25 @@
   </div>
 </div>
 
+<!-- 🔬 Modal สำหรับ ESD -->
+<div id="esdModal">
+  <div class="esd-modal-content">
+    <h3>🧪 ESD Testing</h3>
+    <div class="esd-details">
+      <p><strong>Uniform Code:</strong> <span id="esdUniformCode">-</span></p>
+      <p><strong>Employee ID:</strong> <span id="esdEmpId">-</span></p>
+      <p><strong>Employee Name:</strong> <span id="esdEmpName">-</span></p>
+    </div>
+    <div class="esd-actions">
+      <button id="btnPassESD" class="btn-pass">✅ Pass</button>
+      <button id="btnFailESD" class="btn-fail">❌ Fail</button>
+    </div>
+  </div>
+</div>
 
 
-<!-- Styles and Scripts -->
+
+
 <link rel="stylesheet" href="wash.css" />
 <link rel="stylesheet" href="global.css">
 <script type="module" src="firebaseConfig.js"></script>

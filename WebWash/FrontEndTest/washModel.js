@@ -12,6 +12,7 @@ import {
   where,
   addDoc,
   increment,
+  deleteField,
 } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
 const WASH_COLLECTION = "WashJobs";
@@ -138,16 +139,38 @@ export async function scrapUniform(uniformCode, color) {
 export async function returnToStockAfterESD(washData) {
   const snap = await getUniformByCode(washData.uniformCode, washData.color);
   if (snap.length === 0) return;
+
   const docId = snap[0].id;
+  let rewashCount = washData.rewashCount || 0; // ใช้ rewashCount จาก washData ถ้ามี
+
+  // ถ้า ESD ไม่ผ่าน (สถานะ "ESD Failed") เราจะเพิ่ม rewashCount
+  if (washData.status === "ESD Failed") {
+    rewashCount++; // เพิ่มค่า rewashCount
+  } else if (washData.status === "ESD Passed") {
+    rewashCount = 0; // ถ้าผ่าน ESD ให้รีเซ็ต rewashCount เป็น 0
+  }
+
+  // อัปเดตสถานะใน Inventory ตาม rewashCount
+  let newStatus = "available";
+  if (rewashCount > 0) {
+    newStatus = `Rewash #${rewashCount}`;
+  }
+
+  // อัปเดตสถานะใน Inventory
   await updateDoc(doc(db, INVENTORY_COLLECTION, docId), {
-    availableQty: increment(washData.qty || 1),
-    washingQty: increment(-1 * (washData.qty || 1)),
-    "status.assign": deleteField(),
-    "status.washing": deleteField(),
+    status: newStatus, // ปรับสถานะตาม rewashCount
+    usageStatus: newStatus === "available" ? "available" : "in-use", // ถ้าเป็น available, ใช้ available ถ้าไม่ใช่ให้เป็น in-use
+    rewashCount: rewashCount, // อัปเดตค่า rewashCount
   });
+
+  // ลบ WashJob หลังจากคืนคลัง
   await deleteWashJob(washData.washId);
+
+  // อัปเดตจำนวนทั้งหมดในคลัง
   await updateTotalQty(washData.uniformCode, washData.color);
 }
+
+
 
 // 👤 พนักงาน
 export async function getEmployeeByUniform(uniformCode, color) {
@@ -161,26 +184,4 @@ export async function getEmployeeById(empId) {
   const ref = doc(db, EMPLOYEE_COLLECTION, empId);
   const snap = await getDoc(ref);
   return snap.exists() ? snap.data() : null;
-}
-
-export async function markAsESDFail(washData) {
-  const { washId, uniformCode, color } = washData;
-
-  await addToWashHistory({
-    ...washData,
-    testResult: "FAIL",
-    testDate: new Date().toISOString(),
-    status: "ESD Failed",
-  });
-
-  await deleteWashJob(washId);
-
-  const currentCount = await getRewashCount(uniformCode, color);
-  const newCount = currentCount + 1;
-
-  await setRewashCount(uniformCode, color, newCount);
-
-  if (newCount > 3) {
-    await scrapUniform(uniformCode, color);
-  }
 }

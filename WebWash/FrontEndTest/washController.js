@@ -11,6 +11,7 @@ import {
   setRewashCount,
   returnToStockAfterESD,
   getAllWashHistory,
+  getRewashCount,
 } from "./washModel.js";
 
 import {
@@ -18,6 +19,7 @@ import {
   renderWashHistory,
   renderWashSummary,
   renderPagination,
+  openESDModal,
 } from "./washView.js";
 
 import {
@@ -99,6 +101,7 @@ function setupEventListeners() {
       await handleESDTestFail(washId);
     });
   });
+  
 
   //ทดสอบ
   
@@ -110,6 +113,7 @@ async function saveWashJob() {
   const color = document.getElementById("color").value;
   const empId = document.getElementById("empId").value.trim();
   const empName = document.getElementById("empName").value.trim();
+  const size = document.getElementById("size")?.value.trim() || "";
 
   if (!uniformCode || !color || !empId) {
     showToast("⚠️ กรุณากรอกข้อมูลให้ครบ", "warning");
@@ -117,7 +121,30 @@ async function saveWashJob() {
   }
 
   try {
-    showLoading("กำลังบันทึกข้อมูล...");
+    showLoading("🔄 ตรวจสอบและบันทึก...");
+
+    const allWashes = await getAllWashes();
+    const duplicate = allWashes.find(
+      (w) =>
+        w.uniformCode === uniformCode &&
+        w.color === color &&
+        w.status !== "ESD Passed" &&
+        w.status !== "Scrap"
+    );
+
+    if (duplicate) {
+      showToast("❌ ยูนิฟอร์มรหัสนี้กำลังอยู่ระหว่างการซัก", "error");
+      hideLoading();
+      return;
+    }
+
+    // ✅ ดึงค่า rewashCount จาก InventoryDB
+    const rewashCount = await getRewashCount(uniformCode, color);
+
+    let status = "Waiting to Send";
+    if (rewashCount > 0) {
+      status = `Waiting Rewash #${rewashCount}`;
+    }
 
     const washId = `WASH-${Date.now()}`;
     const newWash = {
@@ -126,22 +153,29 @@ async function saveWashJob() {
       empName,
       uniformCode,
       color,
+      size,
       createdAt: new Date().toISOString(),
-      status: "Waiting to Send",
-      rewashCount: 0,
+      status,
+      rewashCount,
     };
 
     await addWashJob(newWash, washId);
     toggleModal(false);
-    await renderWashTable(await getAllWashes());
-    await renderWashSummary(await getAllWashes());
-    showToast("บันทึกข้อมูลสำเร็จ", "success");
+
+    const updatedWashes = await getAllWashes();
+    await renderWashTable(updatedWashes);
+    await renderWashSummary(updatedWashes);
+
+    showToast("✅ บันทึกงานซักเรียบร้อย", "success");
   } catch (err) {
+    console.error("saveWashJob error:", err);
     showToast("เกิดข้อผิดพลาดในการบันทึก", "error");
   } finally {
     hideLoading();
   }
 }
+
+
 
 // ✅ ลบงานซัก
 export function confirmDeleteWash(id) {
@@ -257,30 +291,34 @@ export function openAddWashModal() {
 
 export async function markAsESDPass(washData) {
   try {
-    const historyEntry = {
-      washId: washData.washId,
-      uniformCode: washData.uniformCode,
-      empId: washData.empId,
-      empName: washData.empName,
-      color: washData.color,
-      testResult: "Pass",
+    showLoading("✅ บันทึกผล ESD ผ่าน...");
+
+    await addToWashHistory({
+      ...washData,
+      testResult: "PASS",
       testDate: new Date().toISOString(),
       status: "ESD Passed",
-    };
-
-    await addToWashHistory(historyEntry);
+    });
 
     await setRewashCount(washData.uniformCode, washData.color, 0);
 
     await returnToStockAfterESD(washData);
 
-    hideLoading();
-    showToast("ESD ผ่านแล้ว", "success");
+    const washes = await getAllWashes();
+    await renderWashTable(washes);
+    await renderWashSummary(washes);
+
+    showToast("✅ ESD ผ่านเรียบร้อย", "success");
   } catch (err) {
-    hideLoading();
+    console.error("markAsESDPass error:", err);
     showToast("เกิดข้อผิดพลาด", "error");
+  } finally {
+    hideLoading();
   }
 }
+
+
+
 
 // ฟังก์ชันขยับวันที่ของ Wash Job// ฟังก์ชันขยับวันที่ของ Wash Job
 export async function shiftWashDate(washId, days) {
@@ -311,12 +349,99 @@ export async function shiftWashDate(washId, days) {
 }
 
 export async function checkAndUpdateWashStatus(wash) {
-  const newStatus = getStatusFromDate(wash);
-  if (wash.status !== newStatus) {
-    await updateWashJob(wash.id, { status: newStatus });
-    wash.status = newStatus; // อัปเดตใน local object ด้วย (ถ้าใช้ซ้ำ)
+  if (!wash.createdAt || wash.status === "Scrap" || wash.status === "ESD Passed") return wash;
+
+  const created = new Date(wash.createdAt);
+  const now = new Date();
+  const diffInDays = Math.floor((now - created) / (1000 * 60 * 60 * 24));
+  const count = wash.rewashCount || 0;
+
+  let newStatus = "";
+
+  if (diffInDays >= 3) {
+    newStatus = "Completed";
+  } else if (diffInDays >= 1) {
+    newStatus = count === 0 ? "Washing" : `Re-Washing #${count}`;
+  } else {
+    newStatus = count === 0 ? "Waiting to Send" : `Waiting Rewash #${count}`;
   }
+
+  if (newStatus !== wash.status) {
+    wash.status = newStatus;
+    await updateWashJob(wash.id, { status: newStatus });
+  }
+
   return wash;
 }
+
+export async function handleESDRequest(id) {
+  try {
+    showLoading("🔍 ตรวจสอบ ESD...");
+    const data = await getWashJobById(id);
+    if (!data || data.status !== "Completed") {
+      showToast("❌ ไม่พบข้อมูลหรือยังไม่อยู่ในสถานะ Completed", "warning");
+      return;
+    }
+    openESDModal(data);
+  } catch (err) {
+    showToast("เกิดข้อผิดพลาดในการโหลดข้อมูล ESD", "error");
+  } finally {markAsESDFail
+    hideLoading();
+  }
+}
+
+export async function markAsESDFail(washData) {
+  try {
+    showLoading("⛔ กำลังบันทึกผล ESD ไม่ผ่าน...");
+
+    await addToWashHistory({
+      ...washData,
+      testResult: "FAIL",
+      testDate: new Date().toISOString(),
+      status: "ESD Failed",
+    });
+
+    await deleteWashJob(washData.washId);
+
+    const currentCount = await getRewashCount(washData.uniformCode, washData.color);
+    const newCount = currentCount + 1;
+
+    await setRewashCount(washData.uniformCode, washData.color, newCount);
+
+    if (newCount > 3) {
+      await scrapUniform(washData.uniformCode, washData.color);
+      await updateTotalQty(washData.uniformCode, washData.color);
+    }
+
+  } catch (err) {
+    console.error("markAsESDFail error:", err);
+    showToast("เกิดข้อผิดพลาดในการประมวลผล ESD ไม่ผ่าน", "error");
+  } finally {
+    hideLoading();
+  }
+}
+
+export async function handleESDTestFail(washData) {
+  try {
+    showLoading("⛔ กำลังประมวลผล ESD ไม่ผ่าน...");
+
+    await markAsESDFail(washData);
+
+    const washes = await getAllWashes();
+    await renderWashTable(washes);
+    await renderWashSummary(washes);
+
+    showToast("❌ ESD ไม่ผ่าน - ดำเนินการเรียบร้อย", "warning");
+  } catch (err) {
+    console.error("❌ handleESDTestFail error:", err);
+    showToast("เกิดข้อผิดพลาดในการประมวลผล ESD ไม่ผ่าน", "error");
+  } finally {
+    hideLoading();
+  }
+}
+
+
+
+
 
 initWashPage();

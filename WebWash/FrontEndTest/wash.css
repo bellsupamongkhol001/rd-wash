@@ -176,32 +176,36 @@ button:focus {
 
 /* ==================== STATUS ==================== */
 .status {
-  padding: 6px 14px;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: bold;
   display: inline-block;
+  text-align: center;
+  min-width: 100px;
+  text-transform: capitalize;
 }
 
-.waiting {
-  background: #ffb74d;
-  color: white;
-}
-.washing {
-  background: #4fc3f7;
-  color: white;
-}
-.completed {
-  background: #81c784;
-  color: white;
-}
-.rewash {
-  background: #ff7043;
-  color: white;
-}
-.scrap {
-  background: #9e9e9e;
-  color: white;
+.status.waiting { background-color: #f0c040; }
+.status.waiting-rewash { background-color: #ffbb55; }
+.status.washing { background-color: #3399ff; }
+.status.rewashing { background-color: #5f8efc; }
+.status.completed { background-color: #4caf50; }
+.status.passed { background-color: #28a745; }
+.status.failed { background-color: #f44336; }
+.status.scrap { background-color: #9e9e9e; }
+
+
+/* ✨ Animation (สำหรับ Rewash Waiting) */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
 }
 
 /* ==================== ACTION BUTTONS ==================== */
@@ -485,6 +489,81 @@ button:focus {
 #confirmModal .btn-cancel {
   background-color: #ccc;
   color: #333;
+}
+
+#esdModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.esd-modal-content {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px 32px;
+  width: 400px;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.esd-modal-content h3 {
+  text-align: center;
+  font-size: 1.5rem;
+  color: #2a2a2a;
+  margin-bottom: 16px;
+}
+
+.esd-details {
+  margin-bottom: 20px;
+  font-size: 1rem;
+  color: #333;
+  line-height: 1.5;
+  border-left: 4px solid #4dabf7;
+  padding-left: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.esd-details strong {
+  color: #1c7ed6;
+}
+
+.esd-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.esd-actions button {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s ease;
+}
+
+.esd-actions .btn-pass {
+  background: #28a745;
+  color: white;
+}
+
+.esd-actions .btn-fail {
+  background: #dc3545;
+  color: white;
+}
+
+.esd-actions button:hover {
+  opacity: 0.9;
 }
 
 @keyframes slideUp {

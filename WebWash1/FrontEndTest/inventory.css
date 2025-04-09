@@ -1,0 +1,300 @@
+/* ==================== 🌐 ROOT VARIABLES ==================== */
+:root {
+  --bg-color: #f4f7fa;
+  --text-color: #2e3a59;
+  --primary: #3a6ea5;
+  --accent-blue: #206fba;
+  --success: #28a745;
+  --danger: #dc3545;
+  --warning: #f4a261;
+  --gray: #6c757d;
+  --status-available: #28a745;
+  --status-in-use: #ffa726;
+  --status-scrap: #9e9e9e;
+}
+
+/* ==================== 🌍 BASE STYLES ==================== */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+}
+
+h2, h3 {
+  color: var(--primary);
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+/* ==================== 📦 INVENTORY SECTION ==================== */
+.inventory-section {
+  padding: 24px;
+}
+
+/* ==================== 🧭 HEADER ==================== */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.header h2 i {
+  margin-right: 8px;
+}
+
+/* ==================== 📊 SUMMARY ==================== */
+.summary-cards {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+/* ==================== 🔍 CONTROLS ==================== */
+.list-controls {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  margin-bottom: 24px;
+}
+
+.list-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.list-actions input {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  width: 260px;
+  font-size: 1rem;
+  transition: 0.2s;
+}
+
+.list-actions input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(58,110,165,0.2);
+  outline: none;
+}
+
+/* ==================== 🧺 CARD GRID ==================== */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.inventory-card {
+  background: #fff;
+  border: 1px solid #dce3ec;
+  border-radius: 10px;
+  padding: 12px;
+  text-align: left;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  transition: 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.inventory-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.inventory-card img {
+  width: 100px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.inventory-card h4 {
+  font-size: 1rem;
+  color: var(--primary);
+  margin-bottom: 4px;
+}
+
+.inventory-card p {
+  font-size: 0.85rem;
+  color: #444;
+  margin: 2px 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.actions button {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.actions button:hover {
+  background: #2f568c;
+}
+
+/* ==================== 🧾 TABLE ==================== */
+.table-panel {
+  border: 1px solid #d0d7e2;
+  border-radius: 8px;
+  overflow-x: auto;
+  background: #fcfdff;
+  margin: 12px 0;
+}
+
+.table-panel table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.table-panel th,
+.table-panel td {
+  padding: 12px 10px;
+  border: 1px solid #ccc;
+  text-align: left;
+}
+
+.table-panel thead {
+  background-color: #e8f0fe;
+  position: sticky;
+  top: 0;
+}
+
+.table-panel tbody tr:nth-child(odd) {
+  background-color: #f9f9f9;
+}
+
+.table-panel tbody tr:hover {
+  background-color: #f1faff;
+}
+
+/* ==================== 🎨 STATUS BADGE ==================== */
+.status {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  color: white;
+  text-align: center;
+  display: inline-block;
+  min-width: 90px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status.available {
+  background-color: var(--status-available);
+}
+
+.status.in-use {
+  background-color: var(--status-in-use);
+}
+
+.status.scrap {
+  background-color: var(--status-scrap);
+}
+
+/* ==================== 📦 MODALS ==================== */
+.modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal.show {
+  display: flex;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 480px;
+  width: 90%;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-content h3 {
+  text-align: center;
+  color: var(--primary);
+  font-size: 1.25rem;
+  margin-bottom: 12px;
+}
+
+.modal-content input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+/* ==================== ✅ BUTTON VARIANTS ==================== */
+.btn {
+  font-family: inherit;
+  font-size: 0.95rem;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-save {
+  background-color: var(--success);
+  color: white;
+}
+
+.btn-cancel {
+  background-color: var(--danger);
+  color: white;
+}
+
+.btn-export {
+  background-color: var(--gray);
+  color: white;
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+/* ==================== ✨ ANIMATIONS ==================== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
